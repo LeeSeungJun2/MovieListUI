@@ -10,92 +10,71 @@ import androidx.recyclerview.widget.RecyclerView;
 
 public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder> {
 
-    private String[] localTitles;
-    private int[] localImages;
+    private final String[] localTitles;
+    private final int[] localImages;
 
-    /**
-     * Provide a reference to the type of views that you are using
-     * (custom ViewHolder)
-     */
+    public interface OnItemClickListener {
+        void onItemClick(View v, int pos);
+    }
+
+    private OnItemClickListener itemClickListener;
+
+    public void setOnItemClickListener(OnItemClickListener lis) {
+        itemClickListener = lis;
+    }
+
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        // private final TextView textView;
-
         private final ImageView imageView;
         private final TextView tvTitle;
         private final TextView tvRating;
         private final TextView tvGenre;
         private final TextView tvYear;
-        public ViewHolder(View view) {
+
+        public ViewHolder(View view, final OnItemClickListener listener) {
             super(view);
-            // Define click listener for the ViewHolder's View
-            // textView = (TextView) view.findViewById(R.id.textView);
             imageView = view.findViewById(R.id.imageView);
             tvTitle = view.findViewById(R.id.tvTitle);
-            tvRating = view.findViewById(R.id.tvRating);
             tvGenre = view.findViewById(R.id.tvGenre);
+            tvRating = view.findViewById(R.id.tvRating);
             tvYear = view.findViewById(R.id.tvYear);
+
+            view.setOnClickListener(v -> {
+                int pos = getAdapterPosition();
+                if (listener != null && pos != RecyclerView.NO_POSITION) {
+                    listener.onItemClick(v, pos);
+                }
+            });
         }
 
-        public ImageView getImageView() {
-            return imageView;
-        }
-
-        public TextView getTvYear() {
-            return tvYear;
-        }
-
-        public TextView getTvGenre() {
-            return tvGenre;
-        }
-
-        public TextView getTvRating() {
-            return tvRating;
-        }
-
-        public TextView getTvTitle() {
-            return tvTitle;
-        }
-
-        /*
-        public TextView getTextView() {
-            return textView;
-        }
-        */
+        public ImageView getImageView() { return imageView; }
+        public TextView getTvTitle() { return tvTitle; }
+        public TextView getTvRating() { return tvRating; }
+        public TextView getTvGenre() { return tvGenre; }
+        public TextView getTvYear() { return tvYear; }
     }
 
-    /**
-     * Initialize the dataset of the Adapter
-     *
-     * @param titles String[] containing the data to populate views to be used
-     * by RecyclerView
-     */
-    public CustomAdapter(String[] dataSet) {
-        localTitles = titles;
-        localImages = images;
+    // 생성자 수정: titles와 images를 받아야 함
+    public CustomAdapter(String[] titles, int[] images) {
+        this.localTitles = titles;
+        this.localImages = images;
     }
 
-    // Create new views (invoked by the layout manager)
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
-        // Create a new view, which defines the UI of the list item
-        View view = LayoutInflater.from(viewGroup.getContext())
-                .inflate(R.layout.movieitem, viewGroup, false);
-
-        return new ViewHolder(view);
+    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.movieitem, parent, false);
+        return new ViewHolder(view, itemClickListener);
     }
 
-    // Replace the contents of a view (invoked by the layout manager)
     @Override
-    public void onBindViewHolder(ViewHolder viewHolder, final int position) {
-
-        // Get element from your dataset at this position and replace the
-        // contents of the view with that element
-        // viewHolder.getTextView().setText(localTitles[position]);
-        viewHolder.getTvTitle().setText(localTitles[position]);
+    public void onBindViewHolder(ViewHolder holder, int position) {
+        holder.getImageView().setImageResource(localImages[position]);
+        holder.getTvTitle().setText(localTitles[position]);
+        holder.getTvRating().setText(String.valueOf(9.0f + position / 100f));
+        holder.getTvGenre().setText("판타지");
+        holder.getTvYear().setText(String.valueOf(2020 + position));
     }
 
-
-    // Return the size of your dataset (invoked by the layout manager)
     @Override
     public int getItemCount() {
         return localTitles.length;
